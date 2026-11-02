@@ -30,6 +30,8 @@ jobs:
 
       - name: Build VKD3D
         run: |
+          sed -i 's/PATHCCH_NONE/0/g' libs/vkd3d-common/platform.c
+          
           ./package-release.sh v3-ll dist --no-package
 
       - name: Package artifacts
