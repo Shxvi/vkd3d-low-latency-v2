@@ -1,0 +1,49 @@
+name: Build and Release VKD3D Low-Latency v3
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build with Arch MinGW
+        uses: Joshua-Ashton/arch-mingw-github-action@v8
+        with:
+          command: |
+            export VERSION_TAG="v3-ll-${GITHUB_RUN_NUMBER}"
+            # Собираем x86 и x64 и упаковываем в архив
+            ./package-release.sh ${VERSION_TAG} dist
+            # Дополнительно сжимаем в удобный .tar.gz (если скрипт создал .tar.zst)
+            cd dist
+            tar -czf vkd3d-proton-${VERSION_TAG}.tar.gz *
+            echo "RELEASE_TAG=${VERSION_TAG}" >> $GITHUB_ENV
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: "VKD3D Low-Latency v3 (Build ${{ github.run_number }})"
+          body: |
+            ### VKD3D-Proton Low Latency (x86-64-v3 Optimized)
+            - **Target:** x86-64-v3 (AVX2, FMA, BMI1/2)
+            - **Flags:** `-O3 -flto`
+            - **Commit:** ${{ github.sha }}
+          files: |
+            dist/*.tar.gz
+            dist/*.tar.zst
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
