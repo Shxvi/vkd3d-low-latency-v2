@@ -1,4 +1,4 @@
-name: Build and Release VKD3D Low-Latency v3
+name: Build and Release VKD3D Low-Latency v2
 
 on:
   push:
@@ -37,17 +37,17 @@ jobs:
       - name: Package artifacts
         run: |
           cd dist
-          tar -czf vkd3d-low-latency-v3.tar.gz *
+          tar -czf vkd3d-low-latency-v2.tar.gz *
           echo "RELEASE_TAG=v3-ll-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          name: "VKD3D Low-Latency v3 (Build ${{ github.run_number }})"
+          name: "VKD3D Low-Latency v2 (Build ${{ github.run_number }})"
           body: |
-            ### VKD3D-Proton Low Latency (x86-64-v3 Optimized)
-            - **Target:** x86-64-v3 (AVX2, FMA, BMI1/2)
+            ### VKD3D-Proton Low Latency (x86-64-v2 Optimized)
+            - **Target:** x86-64-v2
             - **Flags:** `-O3 -flto`
             - **Commit:** ${{ github.sha }}
           files: |
