@@ -18,17 +18,22 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build with Arch MinGW
-        uses: Joshua-Ashton/arch-mingw-github-action@v8
-        with:
-          command: |
-            export VERSION_TAG="v3-ll-${GITHUB_RUN_NUMBER}"
-            # Собираем x86 и x64 и упаковываем в архив
-            ./package-release.sh ${VERSION_TAG} dist
-            # Дополнительно сжимаем в удобный .tar.gz (если скрипт создал .tar.zst)
-            cd dist
-            tar -czf vkd3d-proton-${VERSION_TAG}.tar.gz *
-            echo "RELEASE_TAG=${VERSION_TAG}" >> $GITHUB_ENV
+      - name: Build VKD3D inside official Arch Linux container
+        run: |
+          docker run --rm -v $(pwd):/workspace -w /workspace archlinux:latest bash -c "
+            pacman-key --init && \
+            pacman-key --populate archlinux && \
+            pacman -Sy --noconfirm archlinux-keyring && \
+            pacman -Syu --noconfirm git meson ninja mingw-w64-gcc glslang zstd tar && \
+            git config --global --add safe.directory /workspace && \
+            ./package-release.sh v3-ll dist --no-package
+          "
+
+      - name: Package artifacts
+        run: |
+          cd dist
+          tar -czf vkd3d-low-latency-v3.tar.gz *
+          echo "RELEASE_TAG=v3-ll-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -42,7 +47,6 @@ jobs:
             - **Commit:** ${{ github.sha }}
           files: |
             dist/*.tar.gz
-            dist/*.tar.zst
           draft: false
           prerelease: false
         env:
