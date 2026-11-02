@@ -7,10 +7,10 @@ widl-mingw-tools-fallback = 'i686-w64-mingw32-widl'
 
 [properties]
 needs_exe_wrapper = true
-c_args = ['-O3', '-flto']
-cpp_args = ['-O3', '-flto']
-c_link_args = ['-O3', '-flto']
-cpp_link_args = ['-O3', '-flto']
+c_args = ['-O3', '-march=x86-64-v2', '-mstackrealign', '-mfpmath=sse', '-flto']
+cpp_args = ['-O3', '-march=x86-64-v2', '-mstackrealign', '-mfpmath=sse', '-flto']
+c_link_args = ['-O3', '-march=x86-64-v2', '-flto']
+cpp_link_args = ['-O3', '-march=x86-64-v2', '-flto']
 
 [host_machine]
 system = 'windows'
